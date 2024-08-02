@@ -38,7 +38,7 @@ U32 digitalEdgeSimulationDataGenerator::GenerateSimulationData( U64 largest_samp
 
 void digitalEdgeSimulationDataGenerator::CreateSerialByte()
 {
-	U32 samples_per_bit = mSimulationSampleRateHz / mSettings->mBitRate;
+	U32 samples_per_bit = mSimulationSampleRateHz / 10000;
 
 	U8 byte = mSerialText[ mStringIndex ];
 	mStringIndex++;

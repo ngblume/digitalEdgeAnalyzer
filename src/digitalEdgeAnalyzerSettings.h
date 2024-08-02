@@ -16,12 +16,12 @@ public:
 	virtual const char* SaveSettings();
 
 	
-	Channel mInputChannel;
-	U32 mBitRate;
+	Channel mInputChannel; // "Channel" object (channel which the LLA operates on)
+	double mEdgeSlope; // slope of the edge to look for (to be selected from list, stored as number[double])
 
 protected:
-	AnalyzerSettingInterfaceChannel	mInputChannelInterface;
-	AnalyzerSettingInterfaceInteger	mBitRateInterface;
+	AnalyzerSettingInterfaceChannel	mInputChannelInterface; // interface fct (type: "Channel") for settings this parameter
+	AnalyzerSettingInterfaceNumberList	mEdgeSlopeInterface; // interface fct (type: "NumberList") for settings this parameter
 };
 
 #endif //DIGITALEDGE_ANALYZER_SETTINGS

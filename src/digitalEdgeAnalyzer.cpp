@@ -8,6 +8,8 @@ digitalEdgeAnalyzer::digitalEdgeAnalyzer()
 	mSimulationInitilized( false )
 {
 	SetAnalyzerSettings( &mSettings );
+	// Provide frames as V2 as well, to allow post-processing by HLAs
+    UseFrameV2();
 }
 
 digitalEdgeAnalyzer::~digitalEdgeAnalyzer()
@@ -24,52 +26,86 @@ void digitalEdgeAnalyzer::SetupResults()
 }
 
 void digitalEdgeAnalyzer::WorkerThread()
-{
+{	
 	mSampleRateHz = GetSampleRate();
+	mInput = GetAnalyzerChannelData( mSettings.mInputChannel );
+	mEdgeSlopeAsInt = int( mSettings.mEdgeSlope );
 
-	mSerial = GetAnalyzerChannelData( mSettings.mInputChannel );
-
-	if( mSerial->GetBitState() == BIT_LOW )
-		mSerial->AdvanceToNextEdge();
-
-	U32 samples_per_bit = mSampleRateHz / mSettings.mBitRate;
-	U32 samples_to_first_center_of_first_data_bit = U32( 1.5 * double( mSampleRateHz ) / double( mSettings.mBitRate ) );
+	bool triggerConditionMet = false;
+	int currentTriggerSlope = -1;
 
 	for( ; ; )
 	{
-		U8 data = 0;
-		U8 mask = 1 << 7;
+		// reset helper variables
+		triggerConditionMet = false;
+		currentTriggerSlope = -1;
+
+		// go to next edge
+		mInput->AdvanceToNextEdge();
+
+		// determine slope of edge
+		if( mInput->GetBitState() == BIT_HIGH )
+			// transition was RISING, since BIT is now HIGH (and must therefore have been LOW before [would not be edge otherwise])
+			currentTriggerSlope = 0;
+		else if ( mInput->GetBitState() == BIT_LOW )
+			// transition was FALLING, since BIT is now LOW (and must therefore have been HIGH before [would not be edge otherwise])
+			currentTriggerSlope = 1;
+		else
+			// weird stuff happened > bit is neither HIGH nor LOW !!!!
+			currentTriggerSlope = -1;
 		
-		mSerial->AdvanceToNextEdge(); //falling edge -- beginning of the start bit
-
-		U64 starting_sample = mSerial->GetSampleNumber();
-
-		mSerial->Advance( samples_to_first_center_of_first_data_bit );
-
-		for( U32 i=0; i<8; i++ )
+		if( (mEdgeSlopeAsInt == 0) && (currentTriggerSlope == 0) ) // looking for RISING AND found RISING >> condition met !!
+			triggerConditionMet = true;
+		else if( (mEdgeSlopeAsInt == 1) && (currentTriggerSlope == 1) ) // looking for FALLING AND found FALLING >> condition met !!
+			triggerConditionMet = true;
+		else if( (mEdgeSlopeAsInt == 2) && ( (currentTriggerSlope == 0) || (currentTriggerSlope == 1) ) ) // looking for EITHER AND found RISING OR FALLING >> condition met !!
+			triggerConditionMet = true;
+		else
+			triggerConditionMet = false;
+		
+		// add frame IF trigger condition was met
+		if( triggerConditionMet == true )
 		{
-			//let's put a dot exactly where we sample this bit:
-			mResults->AddMarker( mSerial->GetSampleNumber(), AnalyzerResults::Dot, mSettings.mInputChannel );
+			// add marker, direction of arrow dependiung on direction of slope
+			if ( currentTriggerSlope == 0 ) // RISING
+				mResults->AddMarker( mInput->GetSampleNumber(), AnalyzerResults::UpArrow, mSettings.mInputChannel );
+			else if ( currentTriggerSlope == 1 ) // FALLING
+				mResults->AddMarker( mInput->GetSampleNumber(), AnalyzerResults::DownArrow, mSettings.mInputChannel );
+			else // something weird happened > mark with ErrorDot
+				mResults->AddMarker( mInput->GetSampleNumber(), AnalyzerResults::ErrorDot, mSettings.mInputChannel );
+			
+			// Frame (v1)
+			Frame frame;
+			frame.mData1 = currentTriggerSlope;
+			frame.mFlags = 0;
+			frame.mStartingSampleInclusive = mInput->GetSampleNumber();
+			if ( !mInput->WouldAdvancingCauseTransition( 20 ) )
+				frame.mEndingSampleInclusive = mInput->GetSampleNumber() + 20; // end is 20 samples further than edge > for proper diplaying
+			else if ( !mInput->WouldAdvancingCauseTransition( 5 ) )
+				frame.mEndingSampleInclusive = mInput->GetSampleNumber() + 5; // end is 5 samples further
+			else
+				frame.mEndingSampleInclusive = mInput->GetSampleNumber() + 1; // end is 1 sample further > bare minimum
+			// add Frame V1 to results (NOT commited yet)
+			mResults->AddFrame( frame ); 
 
-			if( mSerial->GetBitState() == BIT_HIGH )
-				data |= mask;
+			// FRAME v2
+			FrameV2 frame_v2;
+			if ( currentTriggerSlope == 0 ) // RISING
+				frame_v2.AddString( "slope", "RISING");
+			else if ( currentTriggerSlope == 1 ) // FALLING
+				frame_v2.AddString( "slope", "FALLING");
+			else
+				frame_v2.AddString( "slope", "ERROR");
+			frame_v2.AddInteger( "value", currentTriggerSlope);
+			// add 
+			mResults->AddFrameV2( frame_v2, "digitalEdge", frame.mStartingSampleInclusive, frame.mEndingSampleInclusive );
 
-			mSerial->Advance( samples_per_bit );
-
-			mask = mask >> 1;
+			mResults->CommitResults();
+			// ReportProgress:
+			// we only checked until this sample. If there were another less than 5 samples away, this will cause error
+			// maybe check ahead with "bool WouldAdvancingCauseTransition( U32 num_samples );" ??
+			ReportProgress( frame.mStartingSampleInclusive ); 
 		}
-
-
-		//we have a byte to save. 
-		Frame frame;
-		frame.mData1 = data;
-		frame.mFlags = 0;
-		frame.mStartingSampleInclusive = starting_sample;
-		frame.mEndingSampleInclusive = mSerial->GetSampleNumber();
-
-		mResults->AddFrame( frame );
-		mResults->CommitResults();
-		ReportProgress( frame.mEndingSampleInclusive );
 	}
 }
 
@@ -91,17 +127,17 @@ U32 digitalEdgeAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 d
 
 U32 digitalEdgeAnalyzer::GetMinimumSampleRateHz()
 {
-	return mSettings.mBitRate * 4;
+	return 25000; // Saleae minimum
 }
 
 const char* digitalEdgeAnalyzer::GetAnalyzerName() const
 {
-	return "embeX digitalEdgeAnalyzer";
+	return "digitalEdgeAnalyzer";
 }
 
 const char* GetAnalyzerName()
 {
-	return "embeX digitalEdgeAnalyzer";
+	return "digitalEdgeAnalyzer";
 }
 
 Analyzer* CreateAnalyzer()

@@ -25,15 +25,15 @@ public:
 protected: //vars
 	digitalEdgeAnalyzerSettings mSettings;
 	std::unique_ptr<digitalEdgeAnalyzerResults> mResults;
-	AnalyzerChannelData* mSerial;
+	AnalyzerChannelData* mInput;
 
 	digitalEdgeSimulationDataGenerator mSimulationDataGenerator;
 	bool mSimulationInitilized;
 
 	//Serial analysis vars:
 	U32 mSampleRateHz;
-	U32 mStartOfStopBitOffset;
-	U32 mEndOfStopBitOffset;
+	U64 Trigger;
+	U64 mEdgeSlopeAsInt;
 };
 
 extern "C" ANALYZER_EXPORT const char* __cdecl GetAnalyzerName();

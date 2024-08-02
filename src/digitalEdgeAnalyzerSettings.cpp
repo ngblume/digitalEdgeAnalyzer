@@ -3,28 +3,31 @@
 
 
 digitalEdgeAnalyzerSettings::digitalEdgeAnalyzerSettings()
-:	mInputChannel( UNDEFINED_CHANNEL ),
-	mBitRate( 9600 ),
-	mInputChannelInterface(),
-	mBitRateInterface()
+:	mInputChannel( UNDEFINED_CHANNEL ), mEdgeSlope(  ) // default values for settings GUI [no channel, no value selected from list]
 {
-	mInputChannelInterface.SetTitleAndTooltip( "Serial", "Standard embeX digitalEdgeAnalyzer" );
+	// cusotmize interface of analyzer with title and tooltips as well as selectable options, etc.
+	mInputChannelInterface.SetTitleAndTooltip( "inputChannel", "inputChannel this digitalEdgeAnalyzer operates on..." );
 	mInputChannelInterface.SetChannel( mInputChannel );
 
-	mBitRateInterface.SetTitleAndTooltip( "Bit Rate (Bits/S)",  "Specify the bit rate in bits per second." );
-	mBitRateInterface.SetMax( 6000000 );
-	mBitRateInterface.SetMin( 1 );
-	mBitRateInterface.SetInteger( mBitRate );
+	// selectable options
+	mEdgeSlopeInterface.SetTitleAndTooltip( "edgeSlope", "Specify the slope of the edge to llok for" );
+    mEdgeSlopeInterface.AddNumber( 0, "RISING", "rising slope at edge" );
+    mEdgeSlopeInterface.AddNumber( 1, "FALLING", "falling slope at edge" );
+	mEdgeSlopeInterface.AddNumber( 2, "EITHER", "rising OR falling slope at edge" );
+    mEdgeSlopeInterface.SetNumber( mEdgeSlope );
 
+	// add the interface components to the interface
 	AddInterface( &mInputChannelInterface );
-	AddInterface( &mBitRateInterface );
+	AddInterface( &mEdgeSlopeInterface );
 
+	// add some export options (??)
 	AddExportOption( 0, "Export as text/csv file" );
 	AddExportExtension( 0, "text", "txt" );
 	AddExportExtension( 0, "csv", "csv" );
 
+	// clear channels and add only relevant channels
 	ClearChannels();
-	AddChannel( mInputChannel, "Serial", false );
+	AddChannel( mInputChannel, "inputChannel", false );
 }
 
 digitalEdgeAnalyzerSettings::~digitalEdgeAnalyzerSettings()
@@ -33,32 +36,36 @@ digitalEdgeAnalyzerSettings::~digitalEdgeAnalyzerSettings()
 
 bool digitalEdgeAnalyzerSettings::SetSettingsFromInterfaces()
 {
-	mInputChannel = mInputChannelInterface.GetChannel();
-	mBitRate = mBitRateInterface.GetInteger();
+	// get values from interface as set by user and store in analyzer object
+	mInputChannel = mInputChannelInterface.GetChannel(); 
+	mEdgeSlope = mEdgeSlopeInterface.GetNumber();
 
 	ClearChannels();
-	AddChannel( mInputChannel, "embeX digitalEdgeAnalyzer", true );
+	AddChannel( mInputChannel, "inputChannel", true );
 
 	return true;
 }
 
 void digitalEdgeAnalyzerSettings::UpdateInterfacesFromSettings()
 {
+	// update values from user configuration in analyzer if changed later on
 	mInputChannelInterface.SetChannel( mInputChannel );
-	mBitRateInterface.SetInteger( mBitRate );
+	mEdgeSlopeInterface.SetNumber( mEdgeSlope );
 }
 
 void digitalEdgeAnalyzerSettings::LoadSettings( const char* settings )
 {
+	// provide means to load the settings from serlized form
 	SimpleArchive text_archive;
 	text_archive.SetString( settings );
 
 	text_archive >> mInputChannel;
-	text_archive >> mBitRate;
+	text_archive >> mEdgeSlope;
 
 	ClearChannels();
-	AddChannel( mInputChannel, "embeX digitalEdgeAnalyzer", true );
+	AddChannel( mInputChannel, "inputChannel", true );
 
+	// Update values in interface with loaded values
 	UpdateInterfacesFromSettings();
 }
 
@@ -67,7 +74,8 @@ const char* digitalEdgeAnalyzerSettings::SaveSettings()
 	SimpleArchive text_archive;
 
 	text_archive << mInputChannel;
-	text_archive << mBitRate;
+	text_archive << mEdgeSlope;
 
+	// return serialized from of settings to be stored
 	return SetReturnString( text_archive.GetString() );
 }
