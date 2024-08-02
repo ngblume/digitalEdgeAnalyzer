@@ -1,3 +1,14 @@
+# digitalEdgeAnalyzer by embeX
+
+Author: Niels Göran Blume, nielsgeroan.blume@embex.de
+
+## ToDo
+- [ ] remove unnecessary example code
+- [ ] define configuration parameters
+- [ ] at each edge, check if conditions are met; if yes, add frame
+
+---
+
 # Saleae Analyzer SDK Sample Analyzer
 
 - [Saleae Analyzer SDK Sample Analyzer](#saleae-analyzer-sdk-sample-analyzer)
