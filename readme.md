@@ -1,6 +1,6 @@
 # digitalEdgeAnalyzer by embeX
 
-Author: Niels Göran Blume, nielsgeroan.blume@embex.de
+Author: Niels Göran Blume, nielsgoeran.blume@embex.de
 
 ## ToDo
 - [ ] remove unnecessary example code
