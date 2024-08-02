@@ -1,6 +1,7 @@
 # digitalEdgeAnalyzer by embeX
 
 Author: @ngblume Niels Göran Blume, nielsgoeran.blume@embex.de
+
 [![Build](https://github.com/ngblume/digitalEdgeAnalyzer/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/ngblume/digitalEdgeAnalyzer/actions/workflows/build.yml)
 
 ## ToDo
