@@ -1,16 +1,16 @@
-#ifndef SIMPLESERIAL_ANALYZER_RESULTS
-#define SIMPLESERIAL_ANALYZER_RESULTS
+#ifndef DIGITALEDGE_ANALYZER_RESULTS
+#define DIGITALEDGE_ANALYZER_RESULTS
 
 #include <AnalyzerResults.h>
 
-class SimpleSerialAnalyzer;
-class SimpleSerialAnalyzerSettings;
+class digitalEdgeAnalyzer;
+class digitalEdgeAnalyzerSettings;
 
-class SimpleSerialAnalyzerResults : public AnalyzerResults
+class digitalEdgeAnalyzerResults : public AnalyzerResults
 {
 public:
-	SimpleSerialAnalyzerResults( SimpleSerialAnalyzer* analyzer, SimpleSerialAnalyzerSettings* settings );
-	virtual ~SimpleSerialAnalyzerResults();
+	digitalEdgeAnalyzerResults( digitalEdgeAnalyzer* analyzer, digitalEdgeAnalyzerSettings* settings );
+	virtual ~digitalEdgeAnalyzerResults();
 
 	virtual void GenerateBubbleText( U64 frame_index, Channel& channel, DisplayBase display_base );
 	virtual void GenerateExportFile( const char* file, DisplayBase display_base, U32 export_type_user_id );
@@ -22,8 +22,8 @@ public:
 protected: //functions
 
 protected:  //vars
-	SimpleSerialAnalyzerSettings* mSettings;
-	SimpleSerialAnalyzer* mAnalyzer;
+	digitalEdgeAnalyzerSettings* mSettings;
+	digitalEdgeAnalyzer* mAnalyzer;
 };
 
-#endif //SIMPLESERIAL_ANALYZER_RESULTS
+#endif //DIGITALEDGE_ANALYZER_RESULTS

@@ -1,8 +1,8 @@
-#include "SimpleSerialAnalyzer.h"
-#include "SimpleSerialAnalyzerSettings.h"
+#include "digitalEdgeAnalyzer.h"
+#include "digitalEdgeAnalyzerSettings.h"
 #include <AnalyzerChannelData.h>
 
-SimpleSerialAnalyzer::SimpleSerialAnalyzer()
+digitalEdgeAnalyzer::digitalEdgeAnalyzer()
 :	Analyzer2(),  
 	mSettings(),
 	mSimulationInitilized( false )
@@ -10,20 +10,20 @@ SimpleSerialAnalyzer::SimpleSerialAnalyzer()
 	SetAnalyzerSettings( &mSettings );
 }
 
-SimpleSerialAnalyzer::~SimpleSerialAnalyzer()
+digitalEdgeAnalyzer::~digitalEdgeAnalyzer()
 {
 	KillThread();
 }
 
-void SimpleSerialAnalyzer::SetupResults()
+void digitalEdgeAnalyzer::SetupResults()
 {
 	// SetupResults is called each time the analyzer is run. Because the same instance can be used for multiple runs, we need to clear the results each time.
-	mResults.reset(new SimpleSerialAnalyzerResults( this, &mSettings ));
+	mResults.reset(new digitalEdgeAnalyzerResults( this, &mSettings ));
 	SetAnalyzerResults( mResults.get() );
 	mResults->AddChannelBubblesWillAppearOn( mSettings.mInputChannel );
 }
 
-void SimpleSerialAnalyzer::WorkerThread()
+void digitalEdgeAnalyzer::WorkerThread()
 {
 	mSampleRateHz = GetSampleRate();
 
@@ -73,12 +73,12 @@ void SimpleSerialAnalyzer::WorkerThread()
 	}
 }
 
-bool SimpleSerialAnalyzer::NeedsRerun()
+bool digitalEdgeAnalyzer::NeedsRerun()
 {
 	return false;
 }
 
-U32 SimpleSerialAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 device_sample_rate, SimulationChannelDescriptor** simulation_channels )
+U32 digitalEdgeAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 device_sample_rate, SimulationChannelDescriptor** simulation_channels )
 {
 	if( mSimulationInitilized == false )
 	{
@@ -89,24 +89,24 @@ U32 SimpleSerialAnalyzer::GenerateSimulationData( U64 minimum_sample_index, U32 
 	return mSimulationDataGenerator.GenerateSimulationData( minimum_sample_index, device_sample_rate, simulation_channels );
 }
 
-U32 SimpleSerialAnalyzer::GetMinimumSampleRateHz()
+U32 digitalEdgeAnalyzer::GetMinimumSampleRateHz()
 {
 	return mSettings.mBitRate * 4;
 }
 
-const char* SimpleSerialAnalyzer::GetAnalyzerName() const
+const char* digitalEdgeAnalyzer::GetAnalyzerName() const
 {
-	return "Simple Serial";
+	return "embeX digitalEdgeAnalyzer";
 }
 
 const char* GetAnalyzerName()
 {
-	return "Simple Serial";
+	return "embeX digitalEdgeAnalyzer";
 }
 
 Analyzer* CreateAnalyzer()
 {
-	return new SimpleSerialAnalyzer();
+	return new digitalEdgeAnalyzer();
 }
 
 void DestroyAnalyzer( Analyzer* analyzer )

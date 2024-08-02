@@ -1,14 +1,14 @@
-#include "SimpleSerialAnalyzerSettings.h"
+#include "digitalEdgeAnalyzerSettings.h"
 #include <AnalyzerHelpers.h>
 
 
-SimpleSerialAnalyzerSettings::SimpleSerialAnalyzerSettings()
+digitalEdgeAnalyzerSettings::digitalEdgeAnalyzerSettings()
 :	mInputChannel( UNDEFINED_CHANNEL ),
 	mBitRate( 9600 ),
 	mInputChannelInterface(),
 	mBitRateInterface()
 {
-	mInputChannelInterface.SetTitleAndTooltip( "Serial", "Standard Simple Serial" );
+	mInputChannelInterface.SetTitleAndTooltip( "Serial", "Standard embeX digitalEdgeAnalyzer" );
 	mInputChannelInterface.SetChannel( mInputChannel );
 
 	mBitRateInterface.SetTitleAndTooltip( "Bit Rate (Bits/S)",  "Specify the bit rate in bits per second." );
@@ -27,28 +27,28 @@ SimpleSerialAnalyzerSettings::SimpleSerialAnalyzerSettings()
 	AddChannel( mInputChannel, "Serial", false );
 }
 
-SimpleSerialAnalyzerSettings::~SimpleSerialAnalyzerSettings()
+digitalEdgeAnalyzerSettings::~digitalEdgeAnalyzerSettings()
 {
 }
 
-bool SimpleSerialAnalyzerSettings::SetSettingsFromInterfaces()
+bool digitalEdgeAnalyzerSettings::SetSettingsFromInterfaces()
 {
 	mInputChannel = mInputChannelInterface.GetChannel();
 	mBitRate = mBitRateInterface.GetInteger();
 
 	ClearChannels();
-	AddChannel( mInputChannel, "Simple Serial", true );
+	AddChannel( mInputChannel, "embeX digitalEdgeAnalyzer", true );
 
 	return true;
 }
 
-void SimpleSerialAnalyzerSettings::UpdateInterfacesFromSettings()
+void digitalEdgeAnalyzerSettings::UpdateInterfacesFromSettings()
 {
 	mInputChannelInterface.SetChannel( mInputChannel );
 	mBitRateInterface.SetInteger( mBitRate );
 }
 
-void SimpleSerialAnalyzerSettings::LoadSettings( const char* settings )
+void digitalEdgeAnalyzerSettings::LoadSettings( const char* settings )
 {
 	SimpleArchive text_archive;
 	text_archive.SetString( settings );
@@ -57,12 +57,12 @@ void SimpleSerialAnalyzerSettings::LoadSettings( const char* settings )
 	text_archive >> mBitRate;
 
 	ClearChannels();
-	AddChannel( mInputChannel, "Simple Serial", true );
+	AddChannel( mInputChannel, "embeX digitalEdgeAnalyzer", true );
 
 	UpdateInterfacesFromSettings();
 }
 
-const char* SimpleSerialAnalyzerSettings::SaveSettings()
+const char* digitalEdgeAnalyzerSettings::SaveSettings()
 {
 	SimpleArchive text_archive;
 
