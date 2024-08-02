@@ -1,11 +1,12 @@
 # digitalEdgeAnalyzer by embeX
 
 Author: @ngblume Niels Göran Blume, nielsgoeran.blume@embex.de
+[![Build](https://github.com/ngblume/digitalEdgeAnalyzer/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/ngblume/digitalEdgeAnalyzer/actions/workflows/build.yml)
 
 ## ToDo
-- [ ] remove unnecessary example code
-- [ ] define configuration parameters
-- [ ] at each edge, check if conditions are met; if yes, add frame
+- [X] remove unnecessary example code
+- [X] define configuration parameters
+- [X] at each edge, check if conditions are met; if yes, add frame
 
 ---
 
