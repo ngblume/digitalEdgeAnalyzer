@@ -54,15 +54,15 @@ void digitalEdgeAnalyzer::WorkerThread()
 			// weird stuff happened > bit is neither HIGH nor LOW !!!!
 			currentTriggerSlope = -1;
 		
-		if( (mEdgeSlopeAsInt == 0) && (currentTriggerSlope == 0) ) // looking for RISING AND found RISING >> condition met !!
+		if( (mEdgeSlopeAsInt == 0) && (currentTriggerSlope == 0) && (mInput->GetSampleNumber() != 0) ) // looking for RISING AND found RISING >> condition met !!
 			triggerConditionMet = true;
-		else if( (mEdgeSlopeAsInt == 1) && (currentTriggerSlope == 1) ) // looking for FALLING AND found FALLING >> condition met !!
+		else if( (mEdgeSlopeAsInt == 1) && (currentTriggerSlope == 1) && (mInput->GetSampleNumber() != 0)  ) // looking for FALLING AND found FALLING >> condition met !!
 			triggerConditionMet = true;
-		else if( (mEdgeSlopeAsInt == 2) && ( (currentTriggerSlope == 0) || (currentTriggerSlope == 1) ) ) // looking for EITHER AND found RISING OR FALLING >> condition met !!
+		else if( (mEdgeSlopeAsInt == 2) && ( (currentTriggerSlope == 0) || (currentTriggerSlope == 1) ) && (mInput->GetSampleNumber() != 0) ) // looking for EITHER AND found RISING OR FALLING >> condition met !!
 			triggerConditionMet = true;
 		else
 			triggerConditionMet = false;
-		
+
 		// add frame IF trigger condition was met
 		if( triggerConditionMet == true )
 		{
